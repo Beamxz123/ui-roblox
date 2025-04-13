@@ -47,13 +47,19 @@ closeBtn.MouseButton1Click:Connect(function()
     frame.Visible = false
 end)
 
-local container = Instance.new("Frame", frame)
+local container = Instance.new("ScrollingFrame", frame)
 container.Size = UDim2.new(1, -20, 1, -60)
 container.Position = UDim2.new(0, 10, 0, 50)
 container.BackgroundTransparency = 1
+container.CanvasSize = UDim2.new(0, 0, 0, 0)
+container.ScrollBarThickness = 6
+container.AutomaticCanvasSize = Enum.AutomaticSize.Y
+container.VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar
+container.AutomaticSize = Enum.AutomaticSize.Y
 
 local layout = Instance.new("UIListLayout", container)
 layout.Padding = UDim.new(0, 10)
+layout.SortOrder = Enum.SortOrder.LayoutOrder
 
 -- ✅ ฟังก์ชันสำหรับเรียกใช้จากภายนอก
 function library.CreateToggle(name, desc, callback)
