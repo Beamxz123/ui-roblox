@@ -13,7 +13,7 @@ screenGui.ResetOnSpawn = false
 screenGui.Parent = playerGui
 
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 350, 0, 350)
+frame.Size = UDim2.new(0, 350, 0, 500)
 frame.Position = UDim2.new(0.5, -175, 0.5, -100)
 frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 frame.BorderSizePixel = 0
