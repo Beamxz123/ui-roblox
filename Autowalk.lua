@@ -522,7 +522,7 @@ local function DepositAllMoney()
         end
     end
 
-    task.wait(1)
+    task.wait(0.5)
 
     -- ใส่เงินทั้งหมดลง TextBox
     local moneyText = UI_upvr.get("HandBalanceLabel", true)
