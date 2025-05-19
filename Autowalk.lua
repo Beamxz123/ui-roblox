@@ -1093,7 +1093,7 @@ Tabs.Secondary:Section({ Title = "เดิน" })
 
 -- ไม่ต้องใช้ตัวเลือกวิธีการเดิน เพราะเราจะใช้ walkPath สำหรับจุด 1-2 และ Tween สำหรับจุด 3-4
 
-Tabs.Secondary:Toggle({
+SecondaryToggle = Tabs.Secondary:Toggle({
     Title = "🚓 เดินไปตามจุดที่กำหนด",
     Description = "จุด 1-2 ใช้ Walk Path, จุด 3-4 ใช้ Tween และกดลง E ที่จุดสุดท้าย",
     Value = false,
@@ -1419,4 +1419,12 @@ end)
 player.CharacterAdded:Connect(function(character)
     task.wait(2)
     resetCameraToCharacter()
+end)
+
+task.delay(1, function()
+    if getgenv().AutoSecondaryWalk then
+        if SecondaryToggle and typeof(SecondaryToggle.Set) == "function" then
+            SecondaryToggle:Set(true)
+        end
+    end
 end)
