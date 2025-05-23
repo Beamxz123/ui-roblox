@@ -712,7 +712,7 @@ local function ExecuteWalkToTargets()
                     if foundTextBox then
                         foundTextBox:CaptureFocus()
                         task.wait(0.1)
-                        foundTextBox.Text = "140000"
+                        foundTextBox.Text = "1400000"
                         foundTextBox:ReleaseFocus()
                         task.wait(0.2)
                     end
