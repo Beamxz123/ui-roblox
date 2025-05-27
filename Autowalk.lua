@@ -9,7 +9,6 @@ local LocalPlayer = game:GetService("Players").LocalPlayer
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 
--- ฟังก์ชันกดปุ่ม
 local function Click_Button(button)
     if button then
         GuiService.SelectedCoreObject = button
@@ -22,9 +21,7 @@ local function Click_Button(button)
     end
 end
 
--- ฟังก์ชันรอกดปุ่ม Play และ Skip
 local function WaitForGameStart()
-    -- รอกด Play
     if LocalPlayer.PlayerGui:FindFirstChild("SplashScreenGui") then
         repeat task.wait(1)
             pcall(function()
@@ -35,7 +32,6 @@ local function WaitForGameStart()
         task.wait(1)
     end
 
-    -- รอกด Skip
     local charCreator = LocalPlayer.PlayerGui:FindFirstChild("CharacterCreator")
     if charCreator and charCreator.Enabled then
         repeat task.wait(1)
@@ -48,7 +44,6 @@ local function WaitForGameStart()
     end
 end
 
--- หันกล้องไปทางตำแหน่งเป้าหมาย
 local function lookAtPosition(targetPosition)
     local camera = workspace.CurrentCamera
     local player = game:GetService("Players").LocalPlayer
@@ -56,7 +51,7 @@ local function lookAtPosition(targetPosition)
     local hrp = character:WaitForChild("HumanoidRootPart")
 
     camera.CameraType = Enum.CameraType.Scriptable
-    local camPosition = hrp.Position + Vector3.new(0, 2, 0) -- กล้องสูงกว่าหัวเล็กน้อย
+    local camPosition = hrp.Position + Vector3.new(0, 2, 0)
     local direction = (targetPosition - camPosition).Unit
     camera.CFrame = CFrame.new(camPosition, camPosition + direction)
     task.wait(0.1)
@@ -91,10 +86,8 @@ local function pressConfirmButton_Universal()
     end
 end
 
--- เรียกใช้งานการรอ UI เกมก่อนแสดง WindUI
 WaitForGameStart()
 
--- โหลดและแสดง WindUI
 local WindUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/Beamxz123/ui-roblox/main/WindLoader.lua"))()
 
 local Window = WindUI:CreateWindow({
@@ -213,7 +206,7 @@ local function walkPath(path)
             end
 
             local currentDistance = (HRP.Position - waypoint.Position).Magnitude
-            if currentDistance < 5 then -- Reached the current waypoint
+            if currentDistance < 5 then
                 break
             end
 
@@ -232,10 +225,9 @@ local function walkPath(path)
                 jumped = true
             end
 
-            -- Check if stuck
             if tick() - stuckTime > 1.5 and math.abs(lastDistance - currentDistance) < 0.5 then
                  warn("Player appears stuck, attempting to continue or recalculate path.")
-                 break -- Break the inner while loop, the outer for loop will move to the next waypoint or finish
+                 break
             end
 
             lastDistance = currentDistance
@@ -256,12 +248,10 @@ local function TweenTo(pos)
     local tween = TweenService:Create(hrp, TweenInfo.new(dist / 18, Enum.EasingStyle.Linear), {CFrame = CFrame.new(pos)})
     tween:Play()
     
-    -- เช็คว่ายังทำงานอยู่หรือไม่
     while tween.PlaybackState ~= Enum.PlaybackState.Completed and isAutoWalkActive do
         RunService.Heartbeat:Wait()
     end
     
-    -- หยุดการเคลื่อนที่ถ้าการทำงานถูกยกเลิก
     if not isAutoWalkActive and tween.PlaybackState ~= Enum.PlaybackState.Completed then
         tween:Cancel()
     end
@@ -353,16 +343,13 @@ local function configurePrompt(prompt)
     end
 end
 
--- ตั้งค่า ProximityPrompt ที่มีอยู่แล้ว
 for _, item in ipairs(props:GetDescendants()) do
     configurePrompt(item)
 end
 
--- ตั้งค่าสำหรับ ProximityPrompt ที่ถูกเพิ่มในอนาคต
 props.DescendantAdded:Connect(configurePrompt)
 
 
--- Function to find and activate the ProximityPrompt near the target
 local function activatePromptNearTarget(targetPosition, maxDistance)
     local Character = LocalPlayer.Character
     if not Character then return end
@@ -379,28 +366,23 @@ local function activatePromptNearTarget(targetPosition, maxDistance)
                 local maxActivation = obj.MaxActivationDistance + 1 or 10
 
                 if distanceToPlayer <= maxActivation then
-                    -- ปิด RequiresLineOfSight เพื่อให้ไม่ต้องเห็น
                     obj.RequiresLineOfSight = false
 
-                    -- รอให้ Prompt ถูก Enabled ก่อน
                     local timeout = 3
                     local start = tick()
                     while not obj.Enabled and tick() - start < timeout do
                         task.wait(0.05)
                     end
 
-                    -- รออีกนิดเพื่อให้ prompt ปรากฏจริง
                     task.wait(0.2)
 
                     print("Activating prompt:", obj.Name)
-                    -- จำลองการกด E
                     VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
                     task.wait(0.2)
                     VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
                     
-                    task.wait(0.5) -- รอผลลัพธ์
+                    task.wait(0.5)
                     
-                    -- ลองอีกครั้งเพื่อความแน่นอน
                     VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
                     task.wait(0.2)
                     VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
@@ -426,7 +408,6 @@ local function waitUntilATMReadyWithPrompt(maxDistance, timeout)
             if atm:IsA("Model") and atm.Name == "ATM" then
                 local dist = (hrp.Position - atm:GetPivot().Position).Magnitude
                 if dist <= maxDistance then
-                    -- ตรวจว่าหน้าจอ ATM ฟื้นหรือยัง
                     local available = false
                     for _, part in ipairs(atm:GetChildren()) do
                         if part:IsA("BasePart") then
@@ -440,7 +421,6 @@ local function waitUntilATMReadyWithPrompt(maxDistance, timeout)
                         end
                     end
 
-                    -- ถ้าใช้ได้แล้ว → หา Prompt
                     if available then
                         for _, d in ipairs(atm:GetDescendants()) do
                             if d:IsA("ProximityPrompt") and d.Enabled then
@@ -493,7 +473,6 @@ local function forceConfirmClick()
 end
 
 
--- ฟังก์ชันใหม่สำหรับเดินไปยังเป้าหมายทีละจุด
 local function ExecuteWalkToTargets()
     if not isAutoWalkActive then
         if LocalPlayer.Character then
@@ -511,7 +490,6 @@ local function ExecuteWalkToTargets()
     local HRP = Character:FindFirstChild("HumanoidRootPart")
     if not Humanoid or not HRP or Humanoid.Health <= 0 then return end
 
-    -- เรียงลำดับจุดเป้าหมาย
     local targetPoints = {
         TARGET_POINTS.FIRST_TARGET,
         TARGET_POINTS.SECOND_TARGET,
@@ -521,19 +499,17 @@ local function ExecuteWalkToTargets()
     
     local start = tick()
     
-    -- วนลูปผ่านแต่ละจุดเป้าหมาย
     for i, targetPos in ipairs(targetPoints) do
         if not isAutoWalkActive then break end
         
         local startPos = HRP.Position
         updateStatus("กำลังเดินไปจุดที่ " .. i .. ": " .. tostring(targetPos))
         
-        -- จุด 1-2 ใช้ walkPath, จุด 3-4 ใช้ Tween
-        if i >= 3 then  -- จุดที่ 3 และ 4 ใช้ TweenTo
+        if i >= 3 then
             print("ใช้ TweenTo ไปยังจุดที่ " .. i)
             local success = TweenTo(targetPos)
             if not success then break end
-        else  -- จุดที่ 1 และ 2 ใช้ walkPath
+        else
             print("ใช้ walkPath ไปยังจุดที่ " .. i)
             local pathToTarget = findPath(startPos, targetPos)
             local drawnMarkers = {}
@@ -549,13 +525,11 @@ local function ExecuteWalkToTargets()
             end
         end
         
-        -- ตรวจสอบว่าถึงจุดหมายหรือไม่
         if (HRP.Position - targetPos).Magnitude > 10 then
             warn("Failed to reach target #" .. i)
             break
         end
         
-        -- พิจารณาทำงานเพิ่มเติมเมื่อถึงจุดสุดท้าย
         if i == #targetPoints and isAutoWalkActive then
             task.wait(0.5)
             print("Reached final target, attempting to activate prompt...")
@@ -567,7 +541,6 @@ local function ExecuteWalkToTargets()
                 if promptActivated then
                     print("ProximityPrompt activated at final target.")
 
-                    -- เริ่ม ATMWithdraw + TextBox + CONFIRM
                     local player = game:GetService("Players").LocalPlayer
                     local playerGui = player:WaitForChild("PlayerGui")
                     local GuiService = game:GetService("GuiService")
@@ -635,7 +608,6 @@ local function ExecuteWalkToTargets()
                     if success then
                         print("✅ ไปยังจุดใหม่เรียบร้อยแล้ว:", nextPoint)
 
-                        -- 🔻 ปิด Toggle เมื่อถึงจุดนี้
                         if SecondaryToggle and typeof(SecondaryToggle.Set) == "function" then
                             SecondaryToggle:Set(false)
                         end
@@ -646,7 +618,6 @@ local function ExecuteWalkToTargets()
             end
         end
         
-        -- รอเล็กน้อยก่อนไปจุดถัดไป
         task.wait(0.5)
     end
     
@@ -692,7 +663,6 @@ local function checkAndEquipFists_Updated()
     end
 end
 
--- ลูปรันเมื่อเปิด toggle
 task.spawn(function()
     while true do
         if autoEquipFistsActive then
@@ -866,8 +836,6 @@ Tabs.Main:Toggle({
 
 Tabs.Secondary:Section({ Title = "เดิน" })
 
--- ไม่ต้องใช้ตัวเลือกวิธีการเดิน เพราะเราจะใช้ walkPath สำหรับจุด 1-2 และ Tween สำหรับจุด 3-4
-
 SecondaryToggle = Tabs.Secondary:Toggle({
     Title = "🚓 เดินไปตามจุดที่กำหนด",
     Description = "จุด 1-2 ใช้ Walk Path, จุด 3-4 ใช้ Tween และกดลง E ที่จุดสุดท้าย",
@@ -878,53 +846,40 @@ SecondaryToggle = Tabs.Secondary:Toggle({
         local camera = workspace.CurrentCamera
         local UserInputService = game:GetService("UserInputService")
         
-        -- ตัวแปรเก็บองศาที่ต้องการให้กล้องหัน
         local targetAngle = 305.34764505661343
 
-        -- ฟังก์ชันสำหรับตั้งค่ามุมกล้องตามองศาที่กำหนด
         local function setCameraDirection(angleDegrees)
             local character = player.Character or player.CharacterAdded:Wait()
             local hrp = character:WaitForChild("HumanoidRootPart")
             
-            -- แปลงองศาเป็นเรเดียน
             local angleRadians = math.rad(angleDegrees)
             
-            -- สร้าง look vector จากมุมองศา
             local lookX = math.cos(angleRadians)
             local lookZ = -math.sin(angleRadians)
             local lookVector = Vector3.new(lookX, 0, lookZ)
             
-            -- บันทึกค่า CameraType เดิม
             local originalCameraType = camera.CameraType
             
-            -- ตั้งค่ากล้องชั่วคราว
             camera.CameraType = Enum.CameraType.Scriptable
             
-            -- ตำแหน่งของกล้อง (อิงจากตัวละคร)
             local cameraPosition = hrp.Position + Vector3.new(0, 2, 0)
             
-            -- สร้าง CFrame สำหรับมุมกล้อง
             local cameraCFrame = CFrame.new(cameraPosition, cameraPosition + lookVector)
             
-            -- ตั้งค่ากล้อง
             camera.CFrame = cameraCFrame
             
-            -- รอสักครู่แล้วคืนค่ากล้องเป็นแบบเดิม
             task.wait(0.1)
             camera.CameraType = originalCameraType
             
             return lookVector
         end
 
-        -- ฟังก์ชันที่แสดงผลทิศทาง
         local function getCameraDirection()
             local lookVector = camera.CFrame.LookVector
             
-            -- หาองศาทิศทางในแนวราบ (XY-plane) โดยใช้ arctangent2
             local angleRadians = math.atan2(-lookVector.Z, lookVector.X)
             local angleDegrees = math.deg(angleRadians)
             
-            -- ปรับองศาให้อยู่ในช่วง 0–360 องศา
             if angleDegrees < 0 then
                 angleDegrees = angleDegrees + 360
             end
@@ -932,7 +887,6 @@ SecondaryToggle = Tabs.Secondary:Toggle({
             return angleDegrees
         end
 
-        -- ฟังก์ชันแสดงทิศตามองศา
         local function displayDirection(angle)
             if angle >= 315 or angle < 45 then
                 print("→ ตะวันออก")
@@ -945,14 +899,11 @@ SecondaryToggle = Tabs.Secondary:Toggle({
             end
         end
 
-        -- ตัวแปรเก็บการเชื่อมต่อเมื่อตัวละครเกิดใหม่
         local characterAddedConnection
 
         if state then
-            -- เมื่อเปิด Toggle
             isAutoWalkActive = true
             
-            -- เริ่มต้นทำงานการเดินไปตามจุด
             if player.Character and 
                player.Character:FindFirstChild("Humanoid") and 
                player.Character:FindFirstChild("HumanoidRootPart") and 
@@ -960,7 +911,6 @@ SecondaryToggle = Tabs.Secondary:Toggle({
                 task.spawn(ExecuteWalkToTargets)
             end
 
-            -- ปรับความเร็วตัวละคร
             task.spawn(function()
                 while isAutoWalkActive do
                     local character = player.Character
@@ -974,22 +924,17 @@ SecondaryToggle = Tabs.Secondary:Toggle({
                 end
             end)
 
-            -- ตั้งค่ากล้องครั้งแรก
             local lookVector = setCameraDirection(targetAngle)
             
-            -- แสดงทิศทางปัจจุบัน
             local currentAngle = getCameraDirection()
             print("มุมกล้องปัจจุบัน:", currentAngle, "องศา")
             displayDirection(currentAngle)
             
-            -- เมื่อตัวละครเกิดใหม่ ให้หันไปทิศทางเดิม
             characterAddedConnection = player.CharacterAdded:Connect(function(character)
-                task.wait(0.5) -- รอให้ตัวละครโหลดเสร็จ
+                task.wait(0.5)
                 if isAutoWalkActive then
-                    -- ตั้งค่าทิศทางกล้องใหม่เมื่อเกิดใหม่
                     setCameraDirection(targetAngle)
                     
-                    -- ตั้งค่าความเร็วเดิน
                     local humanoid = character:WaitForChild("Humanoid")
                     humanoid.WalkSpeed = 29
                     humanoid:SetAttribute("TargetWalkSpeed", 29)
@@ -997,11 +942,9 @@ SecondaryToggle = Tabs.Secondary:Toggle({
             end)
             
         else
-            -- เมื่อปิด Toggle
             isAutoWalkActive = false
             lockedToPosition = false
             
-            -- หยุดการเดิน
             if player.Character then
                 local hum = player.Character:FindFirstChild("Humanoid")
                 if hum then
@@ -1009,7 +952,6 @@ SecondaryToggle = Tabs.Secondary:Toggle({
                 end
             end
             
-            -- ยกเลิกการเชื่อมต่อเมื่อตัวละครเกิดใหม่
             if characterAddedConnection then
                 characterAddedConnection:Disconnect()
                 characterAddedConnection = nil
@@ -1029,14 +971,12 @@ if Tabs and Tabs.Secondary then
 			local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 			local hrp = character:WaitForChild("HumanoidRootPart")
 			
-			-- Tween ไปจุดเป้าหมาย
 			local dist = (hrp.Position - targetPos).Magnitude
 			local tween = TweenService:Create(hrp, TweenInfo.new(dist / 18, Enum.EasingStyle.Linear), {CFrame = CFrame.new(targetPos)})
 			tween:Play()
 			
 			tween.Completed:Wait()
 
-			-- ตั้ง lockedPosition แล้วเปิดระบบล็อก
 			lockedPosition = targetPos
 			lockedToPosition = true
 			
@@ -1049,27 +989,22 @@ local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local camera = workspace.CurrentCamera
 
--- ฟังก์ชันรีเซ็ตกล้องให้กลับมาติดตามตัวละคร
 local function resetCameraToCharacter()
-    -- ตรวจสอบว่าตัวละครมีอยู่จริง
     local character = player.Character
     if not character then
         print("ไม่พบตัวละคร กำลังรอ...")
         character = player.CharacterAdded:Wait()
     end
 
-    -- ตรวจสอบว่ามี HumanoidRootPart
     local hrp = character:FindFirstChild("HumanoidRootPart")
     if not hrp then
         print("รอ HumanoidRootPart...")
         hrp = character:WaitForChild("HumanoidRootPart")
     end
 
-    -- รีเซ็ตกล้องเป็นมุมมองปกติที่ติดตามตัวละคร
     camera.CameraType = Enum.CameraType.Custom
     camera.CameraSubject = character:FindFirstChildOfClass("Humanoid")
     
-    -- ตั้งค่าระยะห่างกล้อง (ปรับตามความเหมาะสม)
     local humanoid = character:FindFirstChildOfClass("Humanoid")
     if humanoid then
         humanoid.CameraOffset = Vector3.new(0, 0, 0)
@@ -1078,20 +1013,10 @@ local function resetCameraToCharacter()
     print("รีเซ็ตกล้องเรียบร้อยแล้ว")
 end
 
--- เรียกใช้ฟังก์ชันรีเซ็ตกล้อง
 resetCameraToCharacter()
 
--- เพิ่มตัวรับข้อมูลปุ่มกดสำหรับรีเซ็ตกล้องด้วยปุ่ม
-local UserInputService = game:GetService("UserInputService")
-UserInputService.InputBegan:Connect(function(input)
-    if input.KeyCode == Enum.KeyCode.R then  -- กดปุ่ม R เพื่อรีเซ็ตกล้อง
-        resetCameraToCharacter()
-    end
-end)
-
--- ตรวจสอบว่ากล้องยังติดตามตัวละครอยู่หรือไม่
 spawn(function()
-    while wait(5) do  -- ตรวจสอบทุก 5 วินาที
+    while wait(5) do
         if camera.CameraType ~= Enum.CameraType.Custom or 
            not camera.CameraSubject or 
            not camera.CameraSubject:IsA("Humanoid") then
@@ -1101,7 +1026,6 @@ spawn(function()
     end
 end)
 
--- ✅ ปุ่มใน UI สำหรับเรียกใช้
 if Tabs and Tabs.Secondary then
 	Tabs.Secondary:Button({
 		Title = "รีจอ",
@@ -1132,14 +1056,12 @@ task.spawn(function()
     local Money = UI_upvr.get("HandBalanceLabel", true)
     local BankMoney = UI_upvr.get("BankBalanceLabel", true)
 
-    -- Wait until the UI elements and their text content are available
     repeat task.wait() until Money and Money.ContentText and Money.ContentText ~= ""
     repeat task.wait() until BankMoney and BankMoney.ContentText and BankMoney.ContentText ~= ""
 
     HandBalanceText:SetTitle("Hand: <font color='#00FF00'>"..formatCurrency(Money.ContentText).."</font>")
     BankBalanceText:SetTitle("Bank: <font color='#00FF00'>"..formatCurrency(BankMoney.ContentText).."</font>")
 
-    -- Update balances when the text changes
     Money:GetPropertyChangedSignal("Text"):Connect(function()
         HandBalanceText:SetTitle("Hand: <font color='#00FF00'>"..formatCurrency(Money.ContentText).."</font>")
     end)
@@ -1163,7 +1085,6 @@ local VirtualInputManager = game:GetService("VirtualInputManager")
 
 local player = Players.LocalPlayer
 
--- 🔄 ฟังก์ชันเช็กว่าผู้เล่นตายอยู่หรือไม่
 local function isDead()
     local char = player.Character
     if not char then return true end
@@ -1172,7 +1093,6 @@ local function isDead()
     return (not hum) or hum.Health <= 0
 end
 
--- 🖱️ ฟังก์ชันกดปุ่ม Respawn แบบรอ GUI 8 วิ
 local function tryClickRespawn()
     print("📌 ตรวจพบว่าผู้เล่นตาย รอ 8 วิ...")
     task.wait(8)
@@ -1202,7 +1122,6 @@ local function tryClickRespawn()
     warn("❌ ไม่เจอปุ่ม Respawn หรือยังไม่เปิด")
 end
 
--- 🔁 ลูปตรวจสอบทุก 0.5 วินาที ว่าผู้เล่นตายหรือไม่
 task.spawn(function()
     while true do
         if isDead() then
